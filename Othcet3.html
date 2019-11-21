@@ -460,7 +460,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Для того, чтобы начать работу с таймером сначала нужно подключить библиотеку регистров с таймерами</p>
 </div>
 <div class="paragraph">
-<p>После того, как подключили библиотеку и регистры добавили в дерево проекта, чтобы совпадали все файлы, следует включить подключить таймер</p>
+<p>После того, как подключили библиотеку и регистры добавили в дерево проекта, чтобы совпадали все файлы, <strong>следует подключить таймер к источнику тактирования.</strong></p>
 </div>
 <div class="paragraph">
 <p>_RCC::APB1ENR::TIM2EN::Enable::Set();</p>
@@ -484,7 +484,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><em>UPD: самое жесткое это правильно посчитать время мигания диода, надеюсь, что я справился с этим, хотя у меня уже есть даже excel-файл для этого)</em></p>
 </div>
 <div class="paragraph">
-<p>После Toggle стоит прописать к какому из Led относится диод, к примеру, Led1 = Led &lt;GPIOC,9&gt;, означает что к диоду 1 относится 9диод в GPIOC (всё элементарно, как мне кажется, и вроде тут я не должен был ошибаться).</p>
+<p>После Toggle стоит прописать к какому из Led относится диод, к примеру, Led1 = Led &lt;GPIOC,9&gt;, <strong>что Светодиод Led1 подключен к выводу 9 порта GPIOC</strong> (всё элементарно, как мне кажется, и вроде тут я не должен был ошибаться).</p>
 </div>
 <div class="paragraph">
 <p>Для того, чтобы по заданию была задержка в 500мс, следует написать
@@ -518,13 +518,63 @@ delay (500);
 }</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Про Delay:</p>
+</div>
+<div class="paragraph">
+<p>Delay - функция задержки, прописывается в миллисекундах.
+Функция delay() приостанавливает исполнение программы на величину времени time, заданного в миллисекундах.
+Данная функция реализуется через функцию void</p>
+</div>
+<div class="paragraph">
+<p>void delay(std::uint32_t delay)</p>
+</div>
+<div class="paragraph">
+<p>{</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>TIM2::ARR::Write(16'000 *delay);
+TIM2::SR::UIF::NoUpdate::Set();
+TIM2::CNT::Write(0);
+TIM2::CR1::CEN::Enable::Set();
+while(TIM2::SR::UIF::NoUpdate::IsSet())
+ {
+ }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>};</p>
+</div>
+<div class="paragraph">
+<p><strong>ARR</strong> - регистр автоперезагрузки, В этот регистр записывается число, до которого будет идти счет. При достижении этого значения, содержимое счетчика <strong>CNT</strong> обнуляется и формируются прерывание или запрос DMA (если они разрешены).​</p>
+</div>
+<div class="paragraph">
+<p>в данном случае число  16'000 - конечное.</p>
+</div>
+<div class="paragraph">
+<p><strong>CR1</strong> - управляющий регистр, в данном случае CEN отвечает за включение счетчика.</p>
+</div>
+<div class="paragraph">
+<p><strong>SR</strong> - регистр статуса, UIF - бит флага прерывания, флаг сброшен.</p>
+</div>
+<div class="paragraph">
+<p>UPD: порты GPIOC, GPIOA расписывать не буду, там понятно идет подключение регистров MODER5,8,9 как выход, и MODER13 как вход.</p>
+</div>
+<div class="paragraph">
+<p>Далее, после подключения всех регистров, идет
+реализация кнопки и работу диодов с помощью функции Toggle.</p>
+</div>
+<div class="paragraph">
+<p>Вот, вроде все новые строки описал, по-моему.</p>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-20 21:57:10 +0500
+Last updated 2019-11-21 18:09:24 +0500
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
