@@ -87,3 +87,63 @@ UPD: порты GPIOC, GPIOA расписывать не буду, там пон
 реализация кнопки и работу диодов с помощью функции Toggle.
 
 Вот, вроде все новые строки описал, по-моему.
+
+
+== *Поправки №3*
+
+ 1) В delay 16000, потому что используем частоту 16Мгц, и получается, чтобы прописывать значения сразу в мс, а не в нано, то следует домножать на 16000, что и написано в скобках после delay.
+
+
+ 2)extern "C"
+{
+  int __low_level_init(void)
+  {
+    RCC::CR::HSION::On::Set();
+    while ( !RCC::CR::HSIRDY::Enable::IsSet( ) )
+     {
+
+     };
+
+    RCC::CFGR::SW::Hsi::Set();
+    while ( !RCC::CFGR::SWS::Hsi::IsSet( ) )
+    {
+
+    };
+
+    RCC::AHB1ENR::GPIOCEN::Enable::Set() ;
+    RCC::AHB1ENR::GPIOAEN::Enable::Set() ;
+    GPIOA::MODER::MODER5::Output::Set() ;
+    GPIOC::MODER::MODER5::Output::Set() ;
+    GPIOC::MODER::MODER8::Output::Set() ;
+    GPIOC::MODER::MODER9::Output::Set() ;
+    GPIOC::MODER::MODER13::Input::Set() ;
+
+    RCC::APB1ENR::TIM2EN::Enable::Set() ;
+    TIM2::CR1::URS::OverFlow::Set();
+    return 0;
+  }
+}
+ 
+ 
+Подключение внутренней частоты:
+
+ RCC::CR::HSION::On::Set();
+
+Дальше, нужно дождаться стабилизации через Ready:
+
+   while ( !RCC::CR::HSIRDY::Enable::IsSet( ) )
+
+Назначить источник на системную частоту: 
+
+ RCC::CFGR::SW::Hsi::Set();
+
+И следующее дождаться пока не переключится на системную:
+
+ while ( !RCC::CFGR::SWS::Hsi::IsSet( ) )
+ 
+ 
+Следующее, что ниже - настройка портов как выходы, а один как вход, ну и с таймером, что я описал выше
+ 
+ Вроде бы всё.
+ 
+
